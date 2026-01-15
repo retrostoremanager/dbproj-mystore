@@ -7,14 +7,23 @@
   <ItemGroup>
     <Folder Include="Tables" />
     <Folder Include="Schemas" />
+    <Folder Include="StoredProcedures" />
   </ItemGroup>
   <ItemGroup>
+    <Build Include="Tables\Company.sql" />
     <Build Include="Tables\Customer.sql" />
     <Build Include="Tables\Employee.sql" />
     <Build Include="Tables\Game.sql" />
     <Build Include="Tables\InventoryItem.sql" />
     <Build Include="Tables\Sale.sql" />
     <Build Include="Tables\SaleItem.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="StoredProcedures\spCompany_GetById.sql" />
+    <Build Include="StoredProcedures\spCompany_GetByEmail.sql" />
+    <Build Include="StoredProcedures\spCompany_GetByVerificationToken.sql" />
+    <Build Include="StoredProcedures\spCompany_Create.sql" />
+    <Build Include="StoredProcedures\spCompany_Update.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Schemas\dbo.sql" />
