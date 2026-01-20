@@ -1,115 +1,109 @@
-# Azure Pipeline for MyStore SQL Database
-# This pipeline builds and deploys the SQL Database project using DACPAC
-# Supports: development, QA, staging, and production environments
+# Azure Pipeline for MyStore PostgreSQL Database
+# This pipeline deploys PostgreSQL schema files
+# Supports: dev and test environments
 
 trigger:
   branches:
     include:
       - main
       - develop
-      - qa
-      - staging
   paths:
     include:
-      - Tables/*
-      - Schemas/*
-      - MyStore.Database.sqlproj
+      - PostgreSQL/*
 
 parameters:
   - name: environment
     displayName: 'Target Environment'
     type: string
-    default: 'development'
+    default: 'dev'
     values:
-      - development
-      - qa
-      - staging
-      - production
+      - dev
+      - test
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 variables:
-  buildConfiguration: 'Release'
-  # Environment-specific variables - set these per environment in Azure DevOps variable groups
-  # Variable groups: mystore-db-dev, mystore-db-qa, mystore-db-staging, mystore-db-prod
+  # Environment-specific variables
   - group: 'mystore-db-${{ parameters.environment }}'
-  # Map branch to environment if parameter not provided
-  - name: targetEnvironment
-    value: ${{ coalesce(parameters.environment, variables['Build.SourceBranchName']) }}
-    ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-      value: 'production'
-    ${{ elseif eq(variables['Build.SourceBranch'], 'refs/heads/staging') }}:
-      value: 'staging'
-    ${{ elseif eq(variables['Build.SourceBranch'], 'refs/heads/qa') }}:
-      value: 'qa'
-    ${{ else }}:
-      value: 'development'
 
 stages:
 - stage: Build
-  displayName: 'Build Database Project'
+  displayName: 'Package PostgreSQL Scripts'
   jobs:
   - job: Build
-    displayName: 'Build DACPAC'
+    displayName: 'Create Deployment Package'
     steps:
     - checkout: self
       displayName: 'Checkout code from GitHub'
       persistCredentials: true
 
-    - task: MSBuild@1
-      displayName: 'Build SQL Database Project'
-      inputs:
-        solution: 'MyStore.Database.sqlproj'
-        platform: 'Any CPU'
-        configuration: '$(buildConfiguration)'
-        msbuildArguments: '/p:SqlServerVersion=Sql150 /p:TargetDatabaseName=$(sqlDatabaseName)'
-
-    - task: CopyFiles@2
-      displayName: 'Copy DACPAC to Artifacts'
-      inputs:
-        SourceFolder: '$(Agent.BuildDirectory)/s'
-        Contents: '**/*.dacpac'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - script: |
+        echo "Packaging PostgreSQL deployment scripts..."
+        mkdir -p $(Build.ArtifactStagingDirectory)/postgres-deploy
+        cp -r PostgreSQL/* $(Build.ArtifactStagingDirectory)/postgres-deploy/
+      displayName: 'Copy PostgreSQL scripts'
 
     - task: PublishBuildArtifacts@1
-      displayName: 'Publish DACPAC Artifact'
+      displayName: 'Publish PostgreSQL Scripts'
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName: 'dacpac'
+        pathToPublish: '$(Build.ArtifactStagingDirectory)/postgres-deploy'
+        artifactName: 'postgres-scripts'
         publishLocation: 'Container'
 
 - stage: Deploy
-  displayName: 'Deploy Database to ${{ variables.targetEnvironment }}'
+  displayName: 'Deploy PostgreSQL Schema to ${{ parameters.environment }}'
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - deployment: DeployDatabase
-    displayName: 'Deploy to Azure SQL'
-    environment: '${{ variables.targetEnvironment }}'
+  - deployment: DeployPostgreSQL
+    displayName: 'Deploy to PostgreSQL'
+    environment: '${{ parameters.environment }}'
     strategy:
       runOnce:
         deploy:
           steps:
-          - task: SqlAzureDacpacDeployment@1
-            displayName: 'Deploy DACPAC to Azure SQL Database'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              ServerName: '$(sqlServerName).database.windows.net'
-              DatabaseName: '$(sqlDatabaseName)'
-              SqlUsername: '$(sqlAdminUsername)'
-              SqlPassword: '$(sqlAdminPassword)'
-              DacpacFile: '$(Pipeline.Workspace)/dacpac/bin/$(buildConfiguration)/MyStore.Database.dacpac'
-              AdditionalArguments: '/p:BlockOnPossibleDataLoss=false /p:CreateNewDatabaseIfNotExist=true'
+          - download: current
+            artifact: postgres-scripts
+            displayName: 'Download PostgreSQL Scripts'
 
           - task: AzureCLI@2
-            displayName: 'Verify Database Deployment'
+            displayName: 'Deploy PostgreSQL Schema'
             inputs:
               azureSubscription: '$(azureSubscription)'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-                echo "##[section]Database Deployment Complete - ${{ variables.targetEnvironment }}"
-                echo "SQL Server: $(sqlServerName).database.windows.net"
-                echo "Database: $(sqlDatabaseName)"
-                echo "Environment: ${{ variables.targetEnvironment }}"
+                echo "Installing PostgreSQL client..."
+                sudo apt-get update
+                sudo apt-get install -y postgresql-client
+                
+                echo "Deploying PostgreSQL schema..."
+                export PGPASSWORD='$(postgresAdminPassword)'
+                
+                # Deploy each SQL file in order
+                for sqlfile in $(Pipeline.Workspace)/postgres-scripts/*.sql; do
+                  if [ -f "$sqlfile" ]; then
+                    filename=$(basename "$sqlfile")
+                    # Skip the deploy_all.sql file as we're running files individually
+                    if [ "$filename" != "000_deploy_all.sql" ]; then
+                      echo "Executing: $filename"
+                      psql -h $(postgresServerName).postgres.database.azure.com \
+                           -U $(postgresAdminUsername) \
+                           -d $(postgresDatabaseName) \
+                           -f "$sqlfile" \
+                           -v ON_ERROR_STOP=1
+                      
+                      if [ $? -eq 0 ]; then
+                        echo "✓ $filename deployed successfully"
+                      else
+                        echo "✗ Failed to deploy $filename"
+                        exit 1
+                      fi
+                    fi
+                  fi
+                done
+                
+                echo "##[section]PostgreSQL Schema Deployment Complete - ${{ parameters.environment }}"
+                echo "Server: $(postgresServerName).postgres.database.azure.com"
+                echo "Database: $(postgresDatabaseName)"
