@@ -2,13 +2,13 @@
 CREATE OR REPLACE FUNCTION company_get_by_id(p_id INTEGER)
 RETURNS TABLE (
     id INTEGER,
-    email VARCHAR(255),
-    status VARCHAR(50),
+    email TEXT,
+    status TEXT,
     trial_start_date TIMESTAMPTZ,
     trial_end_date TIMESTAMPTZ,
-    verification_token VARCHAR(255),
+    verification_token TEXT,
     verification_token_expires TIMESTAMPTZ,
-    subscription_tier VARCHAR(50),
+    subscription_tier TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
 )
@@ -25,16 +25,16 @@ END;
 $$;
 
 -- Function: Get Company by Email
-CREATE OR REPLACE FUNCTION company_get_by_email(p_email VARCHAR(255))
+CREATE OR REPLACE FUNCTION company_get_by_email(p_email TEXT)
 RETURNS TABLE (
     id INTEGER,
-    email VARCHAR(255),
-    status VARCHAR(50),
+    email TEXT,
+    status TEXT,
     trial_start_date TIMESTAMPTZ,
     trial_end_date TIMESTAMPTZ,
-    verification_token VARCHAR(255),
+    verification_token TEXT,
     verification_token_expires TIMESTAMPTZ,
-    subscription_tier VARCHAR(50),
+    subscription_tier TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
 )
@@ -51,16 +51,16 @@ END;
 $$;
 
 -- Function: Get Company by Verification Token
-CREATE OR REPLACE FUNCTION company_get_by_verification_token(p_token VARCHAR(255))
+CREATE OR REPLACE FUNCTION company_get_by_verification_token(p_token TEXT)
 RETURNS TABLE (
     id INTEGER,
-    email VARCHAR(255),
-    status VARCHAR(50),
+    email TEXT,
+    status TEXT,
     trial_start_date TIMESTAMPTZ,
     trial_end_date TIMESTAMPTZ,
-    verification_token VARCHAR(255),
+    verification_token TEXT,
     verification_token_expires TIMESTAMPTZ,
-    subscription_tier VARCHAR(50),
+    subscription_tier TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
 )
@@ -78,13 +78,13 @@ $$;
 
 -- Function: Create Company
 CREATE OR REPLACE FUNCTION company_create(
-    p_email VARCHAR(255),
-    p_status VARCHAR(50),
+    p_email TEXT,
+    p_status TEXT,
     p_trial_start_date TIMESTAMPTZ,
     p_trial_end_date TIMESTAMPTZ,
-    p_verification_token VARCHAR(255) DEFAULT NULL,
+    p_verification_token TEXT DEFAULT NULL,
     p_verification_token_expires TIMESTAMPTZ DEFAULT NULL,
-    p_subscription_tier VARCHAR(50),
+    p_subscription_tier TEXT,
     p_created_date TIMESTAMPTZ,
     p_last_modified_date TIMESTAMPTZ DEFAULT NULL
 )
@@ -113,13 +113,13 @@ $$;
 -- Function: Update Company
 CREATE OR REPLACE FUNCTION company_update(
     p_id INTEGER,
-    p_email VARCHAR(255),
-    p_status VARCHAR(50),
+    p_email TEXT,
+    p_status TEXT,
     p_trial_start_date TIMESTAMPTZ,
     p_trial_end_date TIMESTAMPTZ,
-    p_verification_token VARCHAR(255) DEFAULT NULL,
+    p_verification_token TEXT DEFAULT NULL,
     p_verification_token_expires TIMESTAMPTZ DEFAULT NULL,
-    p_subscription_tier VARCHAR(50),
+    p_subscription_tier TEXT,
     p_last_modified_date TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS INTEGER
