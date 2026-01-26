@@ -32,6 +32,7 @@ jobs:
         PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
       run: |
         echo "Deploying database schema..."
+        cd PostgreSQL
         psql "host=mystore-postgres-dev.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require" \
-          -f PostgreSQL/000_deploy_all.sql
+          -f 000_deploy_all.sql
         echo "Database schema deployed successfully!"
