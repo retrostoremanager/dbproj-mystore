@@ -1,0 +1,37 @@
+name: Deploy Database Schema
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - 'PostgreSQL/**'
+      - 'combined_schema.sql'
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Install PostgreSQL Client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+    
+    - name: Deploy Database Schema
+      env:
+        PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+      run: |
+        echo "Deploying database schema..."
+        psql "host=mystore-postgres-dev.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require" \
+          -f PostgreSQL/000_deploy_all.sql
+        echo "Database schema deployed successfully!"
