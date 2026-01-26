@@ -4,13 +4,13 @@ RETURNS TABLE (
     id INTEGER,
     email VARCHAR(255),
     status VARCHAR(50),
-    trial_start_date TIMESTAMP,
-    trial_end_date TIMESTAMP,
+    trial_start_date TIMESTAMPTZ,
+    trial_end_date TIMESTAMPTZ,
     verification_token VARCHAR(255),
-    verification_token_expires TIMESTAMP,
+    verification_token_expires TIMESTAMPTZ,
     subscription_tier VARCHAR(50),
-    created_date TIMESTAMP,
-    last_modified_date TIMESTAMP
+    created_date TIMESTAMPTZ,
+    last_modified_date TIMESTAMPTZ
 )
 LANGUAGE plpgsql
 AS $$
@@ -30,13 +30,13 @@ RETURNS TABLE (
     id INTEGER,
     email VARCHAR(255),
     status VARCHAR(50),
-    trial_start_date TIMESTAMP,
-    trial_end_date TIMESTAMP,
+    trial_start_date TIMESTAMPTZ,
+    trial_end_date TIMESTAMPTZ,
     verification_token VARCHAR(255),
-    verification_token_expires TIMESTAMP,
+    verification_token_expires TIMESTAMPTZ,
     subscription_tier VARCHAR(50),
-    created_date TIMESTAMP,
-    last_modified_date TIMESTAMP
+    created_date TIMESTAMPTZ,
+    last_modified_date TIMESTAMPTZ
 )
 LANGUAGE plpgsql
 AS $$
@@ -56,13 +56,13 @@ RETURNS TABLE (
     id INTEGER,
     email VARCHAR(255),
     status VARCHAR(50),
-    trial_start_date TIMESTAMP,
-    trial_end_date TIMESTAMP,
+    trial_start_date TIMESTAMPTZ,
+    trial_end_date TIMESTAMPTZ,
     verification_token VARCHAR(255),
-    verification_token_expires TIMESTAMP,
+    verification_token_expires TIMESTAMPTZ,
     subscription_tier VARCHAR(50),
-    created_date TIMESTAMP,
-    last_modified_date TIMESTAMP
+    created_date TIMESTAMPTZ,
+    last_modified_date TIMESTAMPTZ
 )
 LANGUAGE plpgsql
 AS $$
@@ -80,13 +80,13 @@ $$;
 CREATE OR REPLACE FUNCTION company_create(
     p_email VARCHAR(255),
     p_status VARCHAR(50),
-    p_trial_start_date TIMESTAMP,
-    p_trial_end_date TIMESTAMP,
+    p_trial_start_date TIMESTAMPTZ,
+    p_trial_end_date TIMESTAMPTZ,
     p_verification_token VARCHAR(255) DEFAULT NULL,
-    p_verification_token_expires TIMESTAMP DEFAULT NULL,
+    p_verification_token_expires TIMESTAMPTZ DEFAULT NULL,
     p_subscription_tier VARCHAR(50),
-    p_created_date TIMESTAMP,
-    p_last_modified_date TIMESTAMP DEFAULT NULL
+    p_created_date TIMESTAMPTZ,
+    p_last_modified_date TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -115,12 +115,12 @@ CREATE OR REPLACE FUNCTION company_update(
     p_id INTEGER,
     p_email VARCHAR(255),
     p_status VARCHAR(50),
-    p_trial_start_date TIMESTAMP,
-    p_trial_end_date TIMESTAMP,
+    p_trial_start_date TIMESTAMPTZ,
+    p_trial_end_date TIMESTAMPTZ,
     p_verification_token VARCHAR(255) DEFAULT NULL,
-    p_verification_token_expires TIMESTAMP DEFAULT NULL,
+    p_verification_token_expires TIMESTAMPTZ DEFAULT NULL,
     p_subscription_tier VARCHAR(50),
-    p_last_modified_date TIMESTAMP DEFAULT NULL
+    p_last_modified_date TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS INTEGER
 LANGUAGE plpgsql
