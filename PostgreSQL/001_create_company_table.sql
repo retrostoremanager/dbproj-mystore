@@ -1,13 +1,13 @@
 -- Create Company table
 CREATE TABLE IF NOT EXISTS company (
     id                          SERIAL PRIMARY KEY,
-    email                       VARCHAR(255) NOT NULL,
-    status                      VARCHAR(50) NOT NULL,
+    email                       TEXT NOT NULL,
+    status                      TEXT NOT NULL,
     trial_start_date            TIMESTAMPTZ NOT NULL,
     trial_end_date              TIMESTAMPTZ NOT NULL,
-    verification_token          VARCHAR(255),
+    verification_token          TEXT,
     verification_token_expires  TIMESTAMPTZ,
-    subscription_tier           VARCHAR(50) NOT NULL,
+    subscription_tier           TEXT NOT NULL,
     created_date                TIMESTAMPTZ NOT NULL,
     last_modified_date          TIMESTAMPTZ
 );
