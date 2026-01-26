@@ -10,6 +10,7 @@
 \i 006_create_sale_table.sql
 \i 007_create_sale_item_table.sql
 \i 010_create_company_functions.sql
+\i 011_migrate_company_to_timestamptz.sql
 
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;

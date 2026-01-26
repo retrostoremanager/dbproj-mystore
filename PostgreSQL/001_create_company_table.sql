@@ -3,13 +3,13 @@ CREATE TABLE IF NOT EXISTS company (
     id                          SERIAL PRIMARY KEY,
     email                       VARCHAR(255) NOT NULL,
     status                      VARCHAR(50) NOT NULL,
-    trial_start_date            TIMESTAMP NOT NULL,
-    trial_end_date              TIMESTAMP NOT NULL,
+    trial_start_date            TIMESTAMPTZ NOT NULL,
+    trial_end_date              TIMESTAMPTZ NOT NULL,
     verification_token          VARCHAR(255),
-    verification_token_expires  TIMESTAMP,
+    verification_token_expires  TIMESTAMPTZ,
     subscription_tier           VARCHAR(50) NOT NULL,
-    created_date                TIMESTAMP NOT NULL,
-    last_modified_date          TIMESTAMP
+    created_date                TIMESTAMPTZ NOT NULL,
+    last_modified_date          TIMESTAMPTZ
 );
 
 -- Create unique index on email
