@@ -67,7 +67,4 @@ All tables (except `game` which is shared catalog) include a `company_id` column
 - Indexes are created with `IF NOT EXISTS` for idempotency
 - Foreign key constraints ensure referential integrity
 - Partial indexes are used for optional columns (e.g., verification_token)
-
-## GitHub Actions
-
-This repository uses GitHub Actions to automatically deploy database changes to Azure PostgreSQL when changes are pushed to the development branch.
+- GitHub Actions automatically deploys changes to Azure PostgreSQL on push to development branch

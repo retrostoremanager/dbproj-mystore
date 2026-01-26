@@ -1,6 +1,10 @@
 # dbproj-mystore
 
-SQL Server Database Project for MyStore application.
+Database schema definitions for MyStore application.
+
+## Deployment Status
+
+✅ **Deployed to Azure** - The database schema is currently deployed on Azure Database for PostgreSQL Flexible Server.
 
 ## Project Structure
 
@@ -49,17 +53,26 @@ SQL Server Database Project for MyStore application.
    - Foreign Keys: SaleId → Sale.Id (CASCADE DELETE), InventoryItemId → InventoryItem.Id
    - Indexes: SaleId, InventoryItemId
 
-## Building and Deploying
+## Database Platform
 
-This is a SQL Server Database Project (.sqlproj) that can be built and deployed using:
+This project contains schema definitions for both:
+- **SQL Server** (legacy, `.sqlproj` and `Tables/` directory)
+- **PostgreSQL** (current, `PostgreSQL/` directory) ✅ **ACTIVE**
+
+The application is currently using **Azure Database for PostgreSQL Flexible Server**.
+
+## PostgreSQL Schema
+
+The PostgreSQL schema files are located in the `PostgreSQL/` directory and include:
+- Table creation scripts (numbered 001-007)
+- Function definitions (010+)
+- Complete deployment script (`000_deploy_all.sql`)
+
+For PostgreSQL setup and deployment instructions, see `PostgreSQL/README.md`.
+
+## SQL Server (Legacy)
+
+The SQL Server Database Project (`.sqlproj`) files are maintained for reference but are not currently in use. The project can be built using:
 - Visual Studio
 - SQL Server Data Tools (SSDT)
 - Azure Data Studio with SQL Database Projects extension
-- MSBuild command line
-
-To build:
-```
-msbuild MyStore.Database.sqlproj
-```
-
-To publish, use the publish profile or deploy directly from Visual Studio.
