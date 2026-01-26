@@ -82,10 +82,10 @@ CREATE OR REPLACE FUNCTION company_create(
     p_status TEXT,
     p_trial_start_date TIMESTAMPTZ,
     p_trial_end_date TIMESTAMPTZ,
-    p_verification_token TEXT DEFAULT NULL,
-    p_verification_token_expires TIMESTAMPTZ DEFAULT NULL,
     p_subscription_tier TEXT,
     p_created_date TIMESTAMPTZ,
+    p_verification_token TEXT DEFAULT NULL,
+    p_verification_token_expires TIMESTAMPTZ DEFAULT NULL,
     p_last_modified_date TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS INTEGER
