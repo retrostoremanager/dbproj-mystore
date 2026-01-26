@@ -68,3 +68,4 @@ All tables (except `game` which is shared catalog) include a `company_id` column
 - Foreign key constraints ensure referential integrity
 - Partial indexes are used for optional columns (e.g., verification_token)
 - GitHub Actions automatically deploys changes to Azure PostgreSQL on push to development branch
+- The deployment workflow uses `\i` commands, so it must run from the PostgreSQL directory
