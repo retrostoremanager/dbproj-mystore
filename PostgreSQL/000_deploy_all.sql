@@ -2,6 +2,7 @@
 -- Execute this script to create all tables and functions
 
 -- Run migrations in order
+-- 1. Create all tables
 \i 001_create_company_table.sql
 \i 002_create_customer_table.sql
 \i 003_create_employee_table.sql
@@ -9,8 +10,13 @@
 \i 005_create_inventory_item_table.sql
 \i 006_create_sale_table.sql
 \i 007_create_sale_item_table.sql
-\i 010_create_company_functions.sql
+
+-- 2. Migrate existing data/schema
 \i 011_migrate_company_to_timestamptz.sql
+
+-- 3. Drop and recreate functions with correct signatures
+\i 009_drop_company_functions.sql
+\i 010_create_company_functions.sql
 
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
