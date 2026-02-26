@@ -23,5 +23,8 @@
 \i 009_drop_company_functions.sql
 \i 010_create_company_functions.sql
 
+-- 4. Schema cleanup (stripe_customer_id only in payment_method)
+\i 019_drop_company_stripe_customer_id.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;

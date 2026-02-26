@@ -35,4 +35,7 @@ DROP FUNCTION IF EXISTS company_update(INTEGER, TEXT, TEXT, TIMESTAMPTZ, TIMESTA
 -- Drop company_update_stripe_customer_id (EPIC-0-004)
 DROP FUNCTION IF EXISTS company_update_stripe_customer_id(INTEGER, TEXT);
 
+-- Drop company_delete (card required at sign-up rollback)
+DROP FUNCTION IF EXISTS company_delete(INTEGER);
+
 SELECT 'Old company functions dropped successfully!' AS status;

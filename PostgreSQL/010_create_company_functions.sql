@@ -12,7 +12,6 @@ RETURNS TABLE (
     password_reset_token TEXT,
     password_reset_token_expires TIMESTAMPTZ,
     subscription_tier TEXT,
-    stripe_customer_id TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
 )
@@ -23,7 +22,7 @@ BEGIN
     SELECT c.id, c.email, c.password_hash, c.status, c.trial_start_date, c.trial_end_date,
            c.verification_token, c.verification_token_expires,
            c.password_reset_token, c.password_reset_token_expires,
-           c.subscription_tier, c.stripe_customer_id, c.created_date, c.last_modified_date
+           c.subscription_tier, c.created_date, c.last_modified_date
     FROM company c
     WHERE c.id = p_id;
 END;
@@ -43,7 +42,6 @@ RETURNS TABLE (
     password_reset_token TEXT,
     password_reset_token_expires TIMESTAMPTZ,
     subscription_tier TEXT,
-    stripe_customer_id TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
 )
@@ -54,7 +52,7 @@ BEGIN
     SELECT c.id, c.email, c.password_hash, c.status, c.trial_start_date, c.trial_end_date,
            c.verification_token, c.verification_token_expires,
            c.password_reset_token, c.password_reset_token_expires,
-           c.subscription_tier, c.stripe_customer_id, c.created_date, c.last_modified_date
+           c.subscription_tier, c.created_date, c.last_modified_date
     FROM company c
     WHERE c.email = p_email;
 END;
@@ -74,7 +72,6 @@ RETURNS TABLE (
     password_reset_token TEXT,
     password_reset_token_expires TIMESTAMPTZ,
     subscription_tier TEXT,
-    stripe_customer_id TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
 )
@@ -85,7 +82,7 @@ BEGIN
     SELECT c.id, c.email, c.password_hash, c.status, c.trial_start_date, c.trial_end_date,
            c.verification_token, c.verification_token_expires,
            c.password_reset_token, c.password_reset_token_expires,
-           c.subscription_tier, c.stripe_customer_id, c.created_date, c.last_modified_date
+           c.subscription_tier, c.created_date, c.last_modified_date
     FROM company c
     WHERE c.verification_token = p_token;
 END;
@@ -105,7 +102,6 @@ RETURNS TABLE (
     password_reset_token TEXT,
     password_reset_token_expires TIMESTAMPTZ,
     subscription_tier TEXT,
-    stripe_customer_id TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
 )
@@ -116,7 +112,7 @@ BEGIN
     SELECT c.id, c.email, c.password_hash, c.status, c.trial_start_date, c.trial_end_date,
            c.verification_token, c.verification_token_expires,
            c.password_reset_token, c.password_reset_token_expires,
-           c.subscription_tier, c.stripe_customer_id, c.created_date, c.last_modified_date
+           c.subscription_tier, c.created_date, c.last_modified_date
     FROM company c
     WHERE c.password_reset_token = p_token;
 END;
@@ -197,19 +193,16 @@ BEGIN
 END;
 $$;
 
--- Function: Update Company Stripe Customer ID
-CREATE OR REPLACE FUNCTION company_update_stripe_customer_id(p_id INTEGER, p_stripe_customer_id TEXT)
+-- Function: Delete Company (for rollback when payment method storage fails during sign-up)
+-- payment_method has ON DELETE CASCADE, so related records are automatically removed
+CREATE OR REPLACE FUNCTION company_delete(p_id INTEGER)
 RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
     v_rows_affected INTEGER;
 BEGIN
-    UPDATE company
-    SET stripe_customer_id = p_stripe_customer_id,
-        last_modified_date = NOW()
-    WHERE id = p_id;
-    
+    DELETE FROM company WHERE id = p_id;
     GET DIAGNOSTICS v_rows_affected = ROW_COUNT;
     RETURN v_rows_affected;
 END;
