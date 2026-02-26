@@ -9,6 +9,8 @@ RETURNS TABLE (
     trial_end_date TIMESTAMPTZ,
     verification_token TEXT,
     verification_token_expires TIMESTAMPTZ,
+    password_reset_token TEXT,
+    password_reset_token_expires TIMESTAMPTZ,
     subscription_tier TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
@@ -18,8 +20,9 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT c.id, c.email, c.password_hash, c.status, c.trial_start_date, c.trial_end_date,
-           c.verification_token, c.verification_token_expires, c.subscription_tier,
-           c.created_date, c.last_modified_date
+           c.verification_token, c.verification_token_expires,
+           c.password_reset_token, c.password_reset_token_expires,
+           c.subscription_tier, c.created_date, c.last_modified_date
     FROM company c
     WHERE c.id = p_id;
 END;
@@ -36,6 +39,8 @@ RETURNS TABLE (
     trial_end_date TIMESTAMPTZ,
     verification_token TEXT,
     verification_token_expires TIMESTAMPTZ,
+    password_reset_token TEXT,
+    password_reset_token_expires TIMESTAMPTZ,
     subscription_tier TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
@@ -45,8 +50,9 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT c.id, c.email, c.password_hash, c.status, c.trial_start_date, c.trial_end_date,
-           c.verification_token, c.verification_token_expires, c.subscription_tier,
-           c.created_date, c.last_modified_date
+           c.verification_token, c.verification_token_expires,
+           c.password_reset_token, c.password_reset_token_expires,
+           c.subscription_tier, c.created_date, c.last_modified_date
     FROM company c
     WHERE c.email = p_email;
 END;
@@ -63,6 +69,8 @@ RETURNS TABLE (
     trial_end_date TIMESTAMPTZ,
     verification_token TEXT,
     verification_token_expires TIMESTAMPTZ,
+    password_reset_token TEXT,
+    password_reset_token_expires TIMESTAMPTZ,
     subscription_tier TEXT,
     created_date TIMESTAMPTZ,
     last_modified_date TIMESTAMPTZ
@@ -72,10 +80,41 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT c.id, c.email, c.password_hash, c.status, c.trial_start_date, c.trial_end_date,
-           c.verification_token, c.verification_token_expires, c.subscription_tier,
-           c.created_date, c.last_modified_date
+           c.verification_token, c.verification_token_expires,
+           c.password_reset_token, c.password_reset_token_expires,
+           c.subscription_tier, c.created_date, c.last_modified_date
     FROM company c
     WHERE c.verification_token = p_token;
+END;
+$$;
+
+-- Function: Get Company by Password Reset Token
+CREATE OR REPLACE FUNCTION company_get_by_password_reset_token(p_token TEXT)
+RETURNS TABLE (
+    id INTEGER,
+    email TEXT,
+    password_hash TEXT,
+    status TEXT,
+    trial_start_date TIMESTAMPTZ,
+    trial_end_date TIMESTAMPTZ,
+    verification_token TEXT,
+    verification_token_expires TIMESTAMPTZ,
+    password_reset_token TEXT,
+    password_reset_token_expires TIMESTAMPTZ,
+    subscription_tier TEXT,
+    created_date TIMESTAMPTZ,
+    last_modified_date TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT c.id, c.email, c.password_hash, c.status, c.trial_start_date, c.trial_end_date,
+           c.verification_token, c.verification_token_expires,
+           c.password_reset_token, c.password_reset_token_expires,
+           c.subscription_tier, c.created_date, c.last_modified_date
+    FROM company c
+    WHERE c.password_reset_token = p_token;
 END;
 $$;
 
@@ -124,6 +163,9 @@ CREATE OR REPLACE FUNCTION company_update(
     p_subscription_tier TEXT,
     p_verification_token TEXT DEFAULT NULL,
     p_verification_token_expires TIMESTAMPTZ DEFAULT NULL,
+    p_password_hash TEXT DEFAULT NULL,
+    p_password_reset_token TEXT DEFAULT NULL,
+    p_password_reset_token_expires TIMESTAMPTZ DEFAULT NULL,
     p_last_modified_date TIMESTAMPTZ DEFAULT NULL
 )
 RETURNS INTEGER
@@ -139,6 +181,9 @@ BEGIN
         trial_end_date = p_trial_end_date,
         verification_token = p_verification_token,
         verification_token_expires = p_verification_token_expires,
+        password_hash = COALESCE(p_password_hash, password_hash),
+        password_reset_token = p_password_reset_token,
+        password_reset_token_expires = p_password_reset_token_expires,
         subscription_tier = p_subscription_tier,
         last_modified_date = p_last_modified_date
     WHERE id = p_id;

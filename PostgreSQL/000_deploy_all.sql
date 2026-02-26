@@ -15,6 +15,7 @@
 \i 011_migrate_company_to_timestamptz.sql
 \i 012_migrate_company_varchar_to_text.sql
 \i 013_add_company_password_hash.sql
+\i 014_add_company_password_reset.sql
 
 -- 3. Drop and recreate functions with correct signatures
 \i 009_drop_company_functions.sql
