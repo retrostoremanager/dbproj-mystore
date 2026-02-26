@@ -32,4 +32,7 @@ DROP FUNCTION IF EXISTS company_update(INTEGER, TEXT, TEXT, TIMESTAMPTZ, TIMESTA
 -- Drop company_update with password reset params (EPIC-0-003)
 DROP FUNCTION IF EXISTS company_update(INTEGER, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, TEXT, TEXT, TIMESTAMPTZ, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ);
 
+-- Drop company_update_stripe_customer_id (EPIC-0-004)
+DROP FUNCTION IF EXISTS company_update_stripe_customer_id(INTEGER, TEXT);
+
 SELECT 'Old company functions dropped successfully!' AS status;
