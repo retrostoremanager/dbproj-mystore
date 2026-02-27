@@ -27,5 +27,8 @@
 -- 4. Schema cleanup (stripe_customer_id only in payment_method)
 \i 019_drop_company_stripe_customer_id.sql
 
+-- 5. Trial expiration notification tracking (EPIC-0-006-003)
+\i 021_add_trial_notification_tracking.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
