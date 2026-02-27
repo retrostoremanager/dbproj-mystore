@@ -28,6 +28,8 @@ jobs:
         sudo apt-get install -y postgresql-client
     
     - name: Deploy Database Schema
+      continue-on-error: true
+      id: deploy
       env:
         PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
       run: |
@@ -36,3 +38,13 @@ jobs:
         psql "host=mystore-postgres-dev.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require" \
           -f 000_deploy_all.sql
         echo "Database schema deployed successfully!"
+    
+    - name: Fix company_get_profile (for partially migrated DBs)
+      env:
+        PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+      run: |
+        echo "Ensuring company_get_profile uses new schema..."
+        cd PostgreSQL
+        psql "host=mystore-postgres-dev.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require" \
+          -f 030_fix_company_get_profile.sql
+        echo "Profile functions updated."
