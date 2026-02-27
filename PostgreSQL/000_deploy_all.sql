@@ -30,5 +30,8 @@
 -- 5. Trial expiration notification tracking (EPIC-0-006-003)
 \i 021_add_trial_notification_tracking.sql
 
+-- 6. Trial-to-paid conversion function (EPIC-0-006-004)
+\i 022_add_trial_conversion_function.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
