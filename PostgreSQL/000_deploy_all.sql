@@ -36,5 +36,11 @@
 -- 7. Trial suspension function (EPIC-0-006-005)
 \i 023_add_trial_suspension_function.sql
 
+-- 8. Company profile schema (EPIC-0-007-001)
+\i 024_add_company_profile_columns.sql
+\i 025_create_location_table.sql
+\i 026_create_location_functions.sql
+\i 027_add_company_profile_functions.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
