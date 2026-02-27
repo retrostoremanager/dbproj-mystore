@@ -41,6 +41,7 @@
 \i 025_create_location_table.sql
 \i 026_create_location_functions.sql
 \i 027_add_company_profile_functions.sql
+\i 028_add_company_name.sql
 
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
