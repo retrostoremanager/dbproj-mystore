@@ -1,5 +1,11 @@
 -- Fix company_get_profile when 029 was partially applied (columns renamed/dropped but function not updated)
 -- Run this if you get "column c.store_name does not exist"
+-- DROP first (required when return type changes)
+
+DROP FUNCTION IF EXISTS company_get_profile(INTEGER);
+DROP FUNCTION IF EXISTS company_update_profile(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS company_update_profile(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS company_update_profile(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
 
 CREATE OR REPLACE FUNCTION company_get_profile(p_id INTEGER)
 RETURNS TABLE (

@@ -1,6 +1,12 @@
 -- EPIC-0-007-001: Company profile get/update functions
 -- Separate from company_update to keep auth logic clean
 
+-- Drop existing functions (required when return type changes - CREATE OR REPLACE cannot change it)
+DROP FUNCTION IF EXISTS company_get_profile(INTEGER);
+DROP FUNCTION IF EXISTS company_update_profile(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS company_update_profile(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS company_update_profile(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT);
+
 -- Get company profile (company info for profile display/edit)
 CREATE OR REPLACE FUNCTION company_get_profile(p_id INTEGER)
 RETURNS TABLE (

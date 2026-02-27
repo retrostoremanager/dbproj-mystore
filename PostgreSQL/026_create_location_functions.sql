@@ -1,5 +1,12 @@
 -- EPIC-0-007-001: Location table CRUD functions
 
+-- Drop existing functions (required when return type changes - e.g. timezone column added/removed)
+DROP FUNCTION IF EXISTS location_get_by_company_id(INTEGER);
+DROP FUNCTION IF EXISTS location_create(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN);
+DROP FUNCTION IF EXISTS location_create(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN);
+DROP FUNCTION IF EXISTS location_update(INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN);
+DROP FUNCTION IF EXISTS location_update(INTEGER, INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN);
+
 -- Get locations by company ID
 CREATE OR REPLACE FUNCTION location_get_by_company_id(p_company_id INTEGER)
 RETURNS TABLE (

@@ -27,11 +27,16 @@ CREATE INDEX IF NOT EXISTS ix_inventory_item_company_id ON inventory_item(compan
 -- Create index on game_id
 CREATE INDEX IF NOT EXISTS ix_inventory_item_game_id ON inventory_item(game_id);
 
--- Create index on category
-CREATE INDEX IF NOT EXISTS ix_inventory_item_category ON inventory_item(category);
-
--- Create index on name
-CREATE INDEX IF NOT EXISTS ix_inventory_item_name ON inventory_item(name);
+-- Create indexes on category and name (conditional - skip if columns don't exist, e.g. different schema)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'inventory_item' AND column_name = 'category') THEN
+    CREATE INDEX IF NOT EXISTS ix_inventory_item_category ON inventory_item(category);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'inventory_item' AND column_name = 'name') THEN
+    CREATE INDEX IF NOT EXISTS ix_inventory_item_name ON inventory_item(name);
+  END IF;
+END $$;
 
 -- Add comment to table
 COMMENT ON TABLE inventory_item IS 'Stores inventory items for sale';
