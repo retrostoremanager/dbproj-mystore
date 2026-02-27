@@ -33,5 +33,8 @@
 -- 6. Trial-to-paid conversion function (EPIC-0-006-004)
 \i 022_add_trial_conversion_function.sql
 
+-- 7. Trial suspension function (EPIC-0-006-005)
+\i 023_add_trial_suspension_function.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
