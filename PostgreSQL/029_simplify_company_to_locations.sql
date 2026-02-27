@@ -1,16 +1,34 @@
 -- Simplify company profile: Company (name, address, phone) + Locations (each with timezone)
 -- Remove store type; company address/phone separate from location address/phone; timezone per location
+-- Idempotent: safe to run on already-migrated DBs (e.g. when store_* already renamed to company_*)
 
 -- 1. Migrate store_* to company_* and add timezone to location
--- Rename company columns (store_address -> company_address, etc.)
-ALTER TABLE company RENAME COLUMN store_address TO company_address;
-ALTER TABLE company RENAME COLUMN store_city TO company_city;
-ALTER TABLE company RENAME COLUMN store_state TO company_state;
-ALTER TABLE company RENAME COLUMN store_zip_code TO company_zip_code;
-ALTER TABLE company RENAME COLUMN store_phone TO company_phone;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'company' AND column_name = 'store_address') THEN
+    ALTER TABLE company RENAME COLUMN store_address TO company_address;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'company' AND column_name = 'store_city') THEN
+    ALTER TABLE company RENAME COLUMN store_city TO company_city;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'company' AND column_name = 'store_state') THEN
+    ALTER TABLE company RENAME COLUMN store_state TO company_state;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'company' AND column_name = 'store_zip_code') THEN
+    ALTER TABLE company RENAME COLUMN store_zip_code TO company_zip_code;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'company' AND column_name = 'store_phone') THEN
+    ALTER TABLE company RENAME COLUMN store_phone TO company_phone;
+  END IF;
+END $$;
 
--- Migrate store_name to company_name where company_name is null
-UPDATE company SET company_name = store_name WHERE company_name IS NULL AND store_name IS NOT NULL;
+-- Migrate store_name to company_name where company_name is null (only if store_name exists)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'company' AND column_name = 'store_name') THEN
+    UPDATE company SET company_name = store_name WHERE company_name IS NULL AND store_name IS NOT NULL;
+  END IF;
+END $$;
 
 -- Drop removed columns
 ALTER TABLE company DROP COLUMN IF EXISTS store_name;
