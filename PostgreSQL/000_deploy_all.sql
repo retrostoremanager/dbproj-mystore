@@ -42,7 +42,6 @@
 \i 026_create_location_functions.sql
 \i 027_add_company_profile_functions.sql
 \i 028_add_company_name.sql
-\i 029_simplify_company_to_locations.sql
 \i 030_fix_company_get_profile.sql
 
 -- Deployment complete
