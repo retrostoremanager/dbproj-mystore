@@ -44,5 +44,11 @@
 \i 028_add_company_name.sql
 \i 030_fix_company_get_profile.sql
 
+-- 9. User/Role/Permission schema (EPIC-0-008-001)
+\i 031_add_user_role_permission_schema.sql
+
+-- 10. Migrate employee to user, drop employee table
+\i 032_migrate_employee_to_user_drop_employee.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
