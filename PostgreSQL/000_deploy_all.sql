@@ -50,5 +50,8 @@
 -- 10. Migrate employee to user, drop employee table
 \i 032_migrate_employee_to_user_drop_employee.sql
 
+-- 11. Multi-location: Add location_id to inventory_item (EPIC-1-001)
+\i 033_add_inventory_item_location_id.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;

@@ -13,6 +13,7 @@ This directory contains PostgreSQL database migration scripts for the MyStore ap
 - `006_create_sale_table.sql` - Creates the sale table
 - `007_create_sale_item_table.sql` - Creates the sale_item table
 - `010_create_company_functions.sql` - Creates company-related functions
+- `033_add_inventory_item_location_id.sql` - Adds location_id to inventory_item for multi-location (EPIC-1-001)
 
 ## Deployment
 
