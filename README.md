@@ -11,8 +11,8 @@ Database schema definitions for MyStore application.
 - **Tables/** - Contains all table definitions
   - `Customer.sql` - Customer information table
   - `Employee.sql` - Employee information table
-  - `Game.sql` - Game reference data table
-  - `InventoryItem.sql` - Inventory items table
+  - `GameEncyclopedia.sql` - Game catalog (encyclopedia) table
+  - `GameInventory.sql` - Game inventory items table
   - `Sale.sql` - Sales transactions table
   - `SaleItem.sql` - Sale line items table
 

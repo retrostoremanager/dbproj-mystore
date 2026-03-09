@@ -1,4 +1,4 @@
-CREATE TABLE [dbo].[InventoryItem] (
+CREATE TABLE [dbo].[GameInventory] (
     [Id]                INT             IDENTITY (1, 1) NOT NULL,
     [Name]              NVARCHAR (255)  NOT NULL,
     [Category]          NVARCHAR (100)  NOT NULL,
@@ -15,20 +15,20 @@ CREATE TABLE [dbo].[InventoryItem] (
     [Notes]             NVARCHAR (MAX)  NULL,
     [AddedDate]         DATETIME2 (7)   NOT NULL,
     [LastModifiedDate]  DATETIME2 (7)   NULL,
-    CONSTRAINT [PK_InventoryItem] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_InventoryItem_Game] FOREIGN KEY ([GameId]) REFERENCES [dbo].[Game] ([Id])
+    CONSTRAINT [PK_GameInventory] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK_GameInventory_GameEncyclopedia] FOREIGN KEY ([GameId]) REFERENCES [dbo].[GameEncyclopedia] ([Id])
 );
 GO
 
-CREATE NONCLUSTERED INDEX [IX_InventoryItem_GameId]
-    ON [dbo].[InventoryItem]([GameId] ASC);
+CREATE NONCLUSTERED INDEX [IX_GameInventory_GameId]
+    ON [dbo].[GameInventory]([GameId] ASC);
 GO
 
-CREATE NONCLUSTERED INDEX [IX_InventoryItem_Category]
-    ON [dbo].[InventoryItem]([Category] ASC);
+CREATE NONCLUSTERED INDEX [IX_GameInventory_Category]
+    ON [dbo].[GameInventory]([Category] ASC);
 GO
 
-CREATE NONCLUSTERED INDEX [IX_InventoryItem_Name]
-    ON [dbo].[InventoryItem]([Name] ASC);
+CREATE NONCLUSTERED INDEX [IX_GameInventory_Name]
+    ON [dbo].[GameInventory]([Name] ASC);
 GO
 

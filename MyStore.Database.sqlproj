@@ -13,8 +13,8 @@
     <Build Include="Tables\Company.sql" />
     <Build Include="Tables\Customer.sql" />
     <Build Include="Tables\Employee.sql" />
-    <Build Include="Tables\Game.sql" />
-    <Build Include="Tables\InventoryItem.sql" />
+    <Build Include="Tables\GameEncyclopedia.sql" />
+    <Build Include="Tables\GameInventory.sql" />
     <Build Include="Tables\Sale.sql" />
     <Build Include="Tables\SaleItem.sql" />
   </ItemGroup>

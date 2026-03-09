@@ -53,5 +53,8 @@
 -- 11. Multi-location: Add location_id to inventory_item (EPIC-1-001)
 \i 033_add_inventory_item_location_id.sql
 
+-- 12. Rename game -> game_encyclopedia, inventory_item -> game_inventory
+\i 034_rename_game_to_game_encyclopedia_inventory_to_game_inventory.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
