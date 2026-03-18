@@ -56,5 +56,8 @@
 -- 12. Rename game -> game_encyclopedia, inventory_item -> game_inventory
 \i 034_rename_game_to_game_encyclopedia_inventory_to_game_inventory.sql
 
+-- 13. Add company slug for path-based login (/c/{slug}/login)
+\i 035_add_company_slug.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
