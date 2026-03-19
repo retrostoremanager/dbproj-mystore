@@ -71,5 +71,8 @@
 -- 16. Revamp built-in role permissions
 \i 039_revamp_builtin_role_permissions.sql
 
+-- 17. One role per user
+\i 040_one_role_per_user.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
