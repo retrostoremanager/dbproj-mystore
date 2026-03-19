@@ -59,8 +59,17 @@
 -- 12. Rename game -> game_encyclopedia, inventory_item -> game_inventory
 \i 034_rename_game_to_game_encyclopedia_inventory_to_game_inventory.sql
 
--- 13. Add company slug for path-based login (/c/{slug}/login)
+-- 13. Add company slug for path-based login (/{slug}/login)
 \i 035_add_company_slug.sql
+
+-- 14. Reserved slugs: avoid conflicts with system routes
+\i 037_reserved_company_slugs.sql
+
+-- 15. User invitation_expired status
+\i 038_add_invitation_expired_status.sql
+
+-- 16. Revamp built-in role permissions
+\i 039_revamp_builtin_role_permissions.sql
 
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
