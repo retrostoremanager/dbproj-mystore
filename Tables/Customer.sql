@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[Customer] (
     [Id]                INT            IDENTITY (1, 1) NOT NULL,
     [FirstName]         NVARCHAR (100) NOT NULL,
     [LastName]          NVARCHAR (100) NOT NULL,
-    [Email]             NVARCHAR (255) NOT NULL,
+    [Email]             NVARCHAR (255) NULL,
     [Phone]             NVARCHAR (20)  NULL,
     [Address]           NVARCHAR (255) NULL,
     [City]              NVARCHAR (100) NULL,
@@ -15,7 +15,7 @@ CREATE TABLE [dbo].[Customer] (
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Customer_Email]
-    ON [dbo].[Customer]([Email] ASC);
+    ON [dbo].[Customer]([Email] ASC) WHERE ([Email] IS NOT NULL);
 GO
 
 CREATE NONCLUSTERED INDEX [IX_Customer_LastName_FirstName]
