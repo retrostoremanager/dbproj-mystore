@@ -74,5 +74,8 @@
 -- 17. One role per user
 \i 040_one_role_per_user.sql
 
+-- 18. Customer portal user type + nullable customer email
+\i 041_customer_portal_user_and_nullable_customer_email.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
