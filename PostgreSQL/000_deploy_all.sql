@@ -77,5 +77,8 @@
 -- 18. Customer portal user type + nullable customer email
 \i 041_customer_portal_user_and_nullable_customer_email.sql
 
+-- 19. Fix sale table missing subtotal/tax/total columns (idempotent)
+\i 042_fix_sale_missing_columns.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
