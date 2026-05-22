@@ -80,5 +80,8 @@
 -- 19. Fix sale table missing subtotal/tax/total columns (idempotent)
 \i 042_fix_sale_missing_columns.sql
 
+-- 20. Fix sale_item table missing total_price column (idempotent)
+\i 043_fix_sale_item_missing_columns.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
