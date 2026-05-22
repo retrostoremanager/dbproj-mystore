@@ -83,5 +83,8 @@
 -- 20. Fix sale_item table missing total_price column (idempotent)
 \i 043_fix_sale_item_missing_columns.sql
 
+-- 21. Give sale.total_amount a DEFAULT 0 so INSERTs without it succeed
+\i 044_fix_sale_total_amount_default.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
