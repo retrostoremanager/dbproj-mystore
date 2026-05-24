@@ -11,7 +11,11 @@ CREATE TABLE IF NOT EXISTS consignment_item (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ,
     CONSTRAINT fk_consignment_item_company FOREIGN KEY (company_id) REFERENCES company(id),
-    CONSTRAINT fk_consignment_item_customer FOREIGN KEY (customer_id) REFERENCES customer(id)
+    CONSTRAINT fk_consignment_item_customer FOREIGN KEY (customer_id) REFERENCES customer(id),
+    CONSTRAINT chk_consignment_item_asking_price CHECK (asking_price >= 0),
+    CONSTRAINT chk_consignment_item_sale_price CHECK (sale_price >= 0),
+    CONSTRAINT chk_consignment_item_split_percent CHECK (split_percent >= 0 AND split_percent <= 100),
+    CONSTRAINT chk_consignment_item_status CHECK (status IN ('pending', 'sold', 'returned', 'cancelled'))
 );
 
 -- Create index on (company_id, status) for efficient filtering
@@ -30,7 +34,8 @@ CREATE TABLE IF NOT EXISTS consignment_payout (
     amount                  DECIMAL(18, 2) NOT NULL,
     paid_at                 TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     notes                   TEXT,
-    CONSTRAINT fk_consignment_payout_item FOREIGN KEY (consignment_item_id) REFERENCES consignment_item(id)
+    CONSTRAINT fk_consignment_payout_item FOREIGN KEY (consignment_item_id) REFERENCES consignment_item(id),
+    CONSTRAINT chk_consignment_payout_amount CHECK (amount >= 0)
 );
 
 -- Create index on consignment_item_id
