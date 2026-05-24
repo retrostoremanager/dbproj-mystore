@@ -1,0 +1,167 @@
+name: Claude Code Agent
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Prompt for Claude'
+        required: true
+        type: string
+      branch:
+        description: 'Branch to check out (default: development)'
+        required: false
+        default: 'development'
+        type: string
+
+jobs:
+  claude-agent:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: read
+      id-token: write
+    steps:
+      - name: Pre-flight spending cap check
+        run: |
+          LAST=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow=claude-code.yml \
+            --limit=3 --json conclusion,createdAt \
+            --jq '[.[] | select(.conclusion == "failure")] | .[0] // empty')
+          if [ -n "$LAST" ]; then
+            FAILED_AT=$(echo "$LAST" | jq -r '.createdAt')
+            FAILED_AGE=$(( $(date +%s) - $(date -d "$FAILED_AT" +%s) ))
+            if [ "$FAILED_AGE" -lt 3600 ]; then
+              echo "::warning::Last workflow run failed within the past hour. May be a spending cap."
+            fi
+          fi
+          echo "Pre-flight check complete."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || 'development' }}
+          fetch-depth: 1
+
+      - id: claude
+        continue-on-error: true
+        uses: anthropics/claude-code-action@beta
+        env:
+          GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          direct_prompt: ${{ github.event.inputs.prompt }}
+          mode: agent
+          model: claude-sonnet-4-6
+          allowed_tools: Bash,Edit,MultiEdit,Glob,Grep,LS,Read,Write,TodoWrite
+          timeout_minutes: 20
+          max_turns: 20
+
+      - name: Handle spending cap
+        if: steps.claude.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+          BRANCH: ${{ github.event.inputs.branch || 'development' }}
+          PROMPT: ${{ github.event.inputs.prompt || '' }}
+        run: |
+          STEP_OUTPUT="${{ steps.claude.outputs.output }}"
+          if echo "$PROMPT" | grep -qF "You are a code reviewer"; then
+            echo "Code review agent failure — skipping retry logic"
+            exit 1
+          fi
+          if ! echo "$STEP_OUTPUT" | grep -q "Spending cap reached resets"; then
+            echo "Not a spending cap — resetting issue to ready for retry."
+            ISSUE_N=$(echo "$BRANCH" | grep -oP 'feature/issue-\K[0-9]+' || true)
+            if [ -z "$ISSUE_N" ]; then
+              ISSUE_N=$(echo "$PROMPT" | grep -oP 'Issue #\K[0-9]+' | head -1 || true)
+            fi
+            if [ -z "$ISSUE_N" ]; then
+              ISSUE_N=$(echo "$PROMPT" | grep -oP 'orchestrator-mystore#\K[0-9]+' | head -1 || true)
+            fi
+            if [ -z "$ISSUE_N" ]; then
+              echo "Cannot determine issue number — leaving for stale recovery"
+              exit 1
+            fi
+            RETRY_COUNT=$(GH_TOKEN="$GH_DISPATCH_TOKEN" gh issue view "$ISSUE_N" \
+              --repo retrostoremanager/orchestrator-mystore \
+              --json labels \
+              --jq '[.labels[].name | select(startswith("retry-"))] | length' \
+              2>/dev/null || echo "0")
+            NEXT_RETRY=$(( ${RETRY_COUNT:-0} + 1 ))
+            if [ "${RETRY_COUNT:-0}" -ge 3 ]; then
+              GH_TOKEN="$GH_DISPATCH_TOKEN" gh issue edit "$ISSUE_N" \
+                --repo retrostoremanager/orchestrator-mystore \
+                --remove-label in-progress --add-label agent-failed
+              GH_TOKEN="$GH_DISPATCH_TOKEN" gh issue comment "$ISSUE_N" \
+                --repo retrostoremanager/orchestrator-mystore \
+                --body "Agent failed $RETRY_COUNT times — marking **agent-failed** ([run $GITHUB_RUN_ID](https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID))."
+            else
+              GH_TOKEN="$GH_DISPATCH_TOKEN" gh issue edit "$ISSUE_N" \
+                --repo retrostoremanager/orchestrator-mystore \
+                --remove-label in-progress --add-label ready --add-label "retry-$NEXT_RETRY"
+              GH_TOKEN="$GH_DISPATCH_TOKEN" gh issue comment "$ISSUE_N" \
+                --repo retrostoremanager/orchestrator-mystore \
+                --body "Agent workflow failed (retry $NEXT_RETRY/3, [run $GITHUB_RUN_ID](https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)). Resetting to **ready**."
+            fi
+            exit 1
+          fi
+          RESET_ISO=$(date -u -d "+8 hours" +%Y-%m-%dT%H:%M:%SZ)
+          ISSUE_N=$(echo "$BRANCH" | grep -oP 'feature/issue-\K[0-9]+' || true)
+          if [ -z "$ISSUE_N" ]; then
+            ISSUE_N=$(echo "$PROMPT" | grep -oP 'Issue #\K[0-9]+' | head -1 || true)
+          fi
+          if [ -n "$ISSUE_N" ]; then
+            GH_TOKEN="$GH_DISPATCH_TOKEN" gh issue edit "$ISSUE_N" \
+              --repo retrostoremanager/orchestrator-mystore --add-label "cap-wait"
+            GH_TOKEN="$GH_DISPATCH_TOKEN" gh issue comment "$ISSUE_N" \
+              --repo retrostoremanager/orchestrator-mystore \
+              --body "Spending cap reached — will auto-resume after reset (~$RESET_ISO)."
+          fi
+          echo "Spending cap detected — skipping failure notification"
+
+      - name: Trigger code review for any new PR
+        if: steps.claude.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+          PROMPT: ${{ github.event.inputs.prompt || '' }}
+        run: |
+          if echo "$PROMPT" | grep -qF "You are a code reviewer"; then
+            echo "Current run is a code review agent — skipping chained review trigger"
+            exit 0
+          fi
+          ISSUE_N=$(echo "$PROMPT" | grep -oP 'Issue #\K[0-9]+' | head -1 || true)
+          if [ -z "$ISSUE_N" ]; then
+            ISSUE_N=$(echo "$PROMPT" | grep -oP 'orchestrator-mystore#\K[0-9]+' | head -1 || true)
+          fi
+          if [ -n "$ISSUE_N" ]; then
+            PR_DATA=$(GH_TOKEN="$GH_DISPATCH_TOKEN" gh pr list \
+              --repo retrostoremanager/dbproj-mystore \
+              --base development --state open \
+              --json number,headRefName,labels \
+              --jq "[.[] | select(
+                .headRefName == \"feature/issue-${ISSUE_N}\" and
+                (.labels | map(.name) | any(startswith(\"review-retry-\") or . == \"needs-human-review\") | not)
+              )] | first // empty")
+          fi
+          if [ -z "$PR_DATA" ] || [ "$PR_DATA" = "null" ]; then
+            echo "No open feature PRs awaiting review — skipping"
+            exit 0
+          fi
+          PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
+          HEAD_BRANCH=$(echo "$PR_DATA" | jq -r '.headRefName')
+          PR_ISSUE_N=$(echo "$HEAD_BRANCH" | grep -oP 'feature/issue-\K[0-9]+' || true)
+          if [ -n "$PR_ISSUE_N" ]; then
+            ISSUE_LABELS=$(GH_TOKEN="$GH_DISPATCH_TOKEN" gh issue view "$PR_ISSUE_N" \
+              --repo retrostoremanager/orchestrator-mystore \
+              --json labels --jq '[.labels[].name]' 2>/dev/null || echo "[]")
+            if echo "$ISSUE_LABELS" | grep -q '"code-review"'; then
+              echo "Issue #$PR_ISSUE_N already in code-review — skipping duplicate dispatch"
+              exit 0
+            fi
+          fi
+          echo "Found PR #$PR_NUMBER on $HEAD_BRANCH — dispatching code review"
+          export PR_NUMBER HEAD_BRANCH
+          bash scripts/trigger-review.sh
