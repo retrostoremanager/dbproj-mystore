@@ -34,6 +34,11 @@ jobs:
       run: |
         echo "Deploying database schema..."
         cd PostgreSQL
-        psql "host=mystore-postgres-b1.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require" \
-          -f 000_deploy_all.sql
+        # Auto-discover all numbered migration files in order.
+        # New files are picked up automatically — no need to update 000_deploy_all.sql.
+        CONN="host=mystore-postgres-b1.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require"
+        for sql in $(ls [0-9][0-9][0-9]_*.sql 2>/dev/null | grep -v '^000_' | sort); do
+          echo "  Running $sql..."
+          psql "$CONN" -f "$sql"
+        done
         echo "Database schema deployed successfully!"
