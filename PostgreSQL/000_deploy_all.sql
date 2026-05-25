@@ -86,5 +86,11 @@
 -- 21. Give sale.total_amount a DEFAULT 0 so INSERTs without it succeed
 \i 044_fix_sale_total_amount_default.sql
 
+-- 22. Consignment tables
+\i 045_create_consignment_tables.sql
+
+-- 23. Seed consignment permissions for system roles
+\i 046_seed_consignment_permissions.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
