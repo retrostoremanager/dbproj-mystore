@@ -34,6 +34,6 @@ jobs:
       run: |
         echo "Deploying database schema..."
         cd PostgreSQL
-        psql "host=mystore-postgres-dev.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require" \
+        psql "host=mystore-postgres-b1.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require" \
           -f 000_deploy_all.sql
         echo "Database schema deployed successfully!"
