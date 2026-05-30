@@ -92,5 +92,11 @@
 -- 23. Seed consignment permissions for system roles
 \i 046_seed_consignment_permissions.sql
 
+-- 24. Promotion table with type, scope, and date range support
+\i 055_create_promotion_table.sql
+
+-- 25. Seed promotion permissions for system roles
+\i 056_seed_promotion_permissions.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
