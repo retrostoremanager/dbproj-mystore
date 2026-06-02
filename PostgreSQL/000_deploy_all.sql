@@ -98,5 +98,8 @@
 -- 25. Seed promotion permissions for system roles
 \i 056_seed_promotion_permissions.sql
 
+-- 26. Align consignment schema with acceptance criteria (status values, company_id index, FK ON DELETE)
+\i 057_align_consignment_schema.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
