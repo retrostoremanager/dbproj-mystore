@@ -101,5 +101,17 @@
 -- 26. Align consignment schema with acceptance criteria (status values, company_id index, FK ON DELETE)
 \i 057_align_consignment_schema.sql
 
+-- 27. Trade-in tables (TradeIns and TradeInItems)
+\i 048_create_trade_in_tables.sql
+
+-- 28. Seed trade-in permissions for system roles
+\i 049_seed_trade_in_permissions.sql
+
+-- 29. Make trade-in payment_type nullable
+\i 050_make_trade_in_payment_type_nullable.sql
+
+-- 30. Align trade-in permissions with acceptance criteria (remove trade_in.complete from Employee)
+\i 058_align_trade_in_permissions.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
