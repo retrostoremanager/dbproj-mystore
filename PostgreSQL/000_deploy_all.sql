@@ -113,5 +113,8 @@
 -- 30. Align trade-in permissions with acceptance criteria (remove trade_in.complete from Employee)
 \i 058_align_trade_in_permissions.sql
 
+-- 31. Fix trade_in_item FK to point at game_inventory(id) (was inventory_item from migration 048)
+\i 059_fix_trade_in_item_inventory_item_fk.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
