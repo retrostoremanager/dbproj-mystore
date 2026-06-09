@@ -113,5 +113,8 @@
 -- 30. Align trade-in permissions with acceptance criteria (remove trade_in.complete from Employee)
 \i 058_align_trade_in_permissions.sql
 
+-- 31. Align promotion schema with acceptance criteria (dedicated company_id index)
+\i 060_align_promotion_schema.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
