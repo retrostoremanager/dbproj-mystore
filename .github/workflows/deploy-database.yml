@@ -42,3 +42,19 @@ jobs:
           psql "$CONN" -f "$sql"
         done
         echo "Database schema deployed successfully!"
+
+    - name: Sync app_user password from Key Vault
+      env:
+        PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+      run: |
+        # 062 creates the app_user login role (the role the app connects as, so RLS enforces)
+        # but not its password (a secret). Set it from Key Vault so the role is usable after any
+        # DB rebuild / in a fresh environment. No-op if the secret isn't present yet.
+        APP_PW=$(az keyvault secret show --vault-name mystore-kv-dev --name AppDbPassword --query value -o tsv 2>/dev/null || true)
+        CONN="host=mystore-postgres-b1.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require"
+        if [ -n "$APP_PW" ]; then
+          psql "$CONN" -c "ALTER ROLE app_user WITH PASSWORD '$APP_PW'"
+          echo "app_user password synced from Key Vault."
+        else
+          echo "AppDbPassword not found in Key Vault - skipping (app_user will be unusable until it is set)."
+        fi
