@@ -116,5 +116,11 @@
 -- 31. Align promotion schema with acceptance criteria (dedicated company_id index)
 \i 060_align_promotion_schema.sql
 
+-- 32. Enable Row-Level Security on tenant tables (database-level multi-tenant backstop).
+--     ORDER-CRITICAL: only deploy once the app sets app.current_company_id on its connections
+--     (fn-mystore TenantConnection). Runs LAST so every tenant table already exists. See the
+--     file header for the full rollout caveat.
+\i 061_enable_row_level_security.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
