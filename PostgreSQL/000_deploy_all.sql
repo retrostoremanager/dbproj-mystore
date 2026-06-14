@@ -122,5 +122,10 @@
 --     file header for the full rollout caveat.
 \i 061_enable_row_level_security.sql
 
+-- 33. Create the dedicated app_user login role (NOBYPASSRLS) so RLS actually enforces.
+--     The app's connection string must be switched to this role; sqladmin (BYPASSRLS) keeps
+--     working until then. Password is set out-of-band (secret), not in this migration.
+\i 062_create_app_user_role.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
