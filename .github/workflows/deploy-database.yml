@@ -1,0 +1,60 @@
+name: Deploy Database Schema
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - 'PostgreSQL/**'
+      - 'combined_schema.sql'
+      - '.github/workflows/deploy-database.yml'
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Install PostgreSQL Client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+    
+    - name: Deploy Database Schema
+      env:
+        PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+      run: |
+        echo "Deploying database schema..."
+        cd PostgreSQL
+        # Auto-discover all numbered migration files in order.
+        # New files are picked up automatically — no need to update 000_deploy_all.sql.
+        CONN="host=mystore-postgres-b1.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require"
+        for sql in $(ls [0-9][0-9][0-9]_*.sql 2>/dev/null | grep -v '^000_' | sort); do
+          echo "  Running $sql..."
+          psql "$CONN" -f "$sql"
+        done
+        echo "Database schema deployed successfully!"
+
+    - name: Sync app_user password from Key Vault
+      env:
+        PGPASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+      run: |
+        # 062 creates the app_user login role (the role the app connects as, so RLS enforces)
+        # but not its password (a secret). Set it from Key Vault so the role is usable after any
+        # DB rebuild / in a fresh environment. No-op if the secret isn't present yet.
+        APP_PW=$(az keyvault secret show --vault-name mystore-kv-dev --name AppDbPassword --query value -o tsv 2>/dev/null || true)
+        CONN="host=mystore-postgres-b1.postgres.database.azure.com port=5432 dbname=mystore-db-dev user=sqladmin sslmode=require"
+        if [ -n "$APP_PW" ]; then
+          psql "$CONN" -c "ALTER ROLE app_user WITH PASSWORD '$APP_PW'"
+          echo "app_user password synced from Key Vault."
+        else
+          echo "AppDbPassword not found in Key Vault - skipping (app_user will be unusable until it is set)."
+        fi
