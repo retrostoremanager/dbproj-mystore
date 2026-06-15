@@ -101,6 +101,10 @@
 -- 26. Align consignment schema with acceptance criteria (status values, company_id index, FK ON DELETE)
 \i 057_align_consignment_schema.sql
 
+-- 26b. Align consignment schema with issue #357 acceptance criteria
+--      (status default 'active', updated_at NOT NULL, NO ACTION FKs, renamed indexes)
+\i 063_align_consignment_constraints.sql
+
 -- 27. Trade-in tables (TradeIns and TradeInItems)
 \i 048_create_trade_in_tables.sql
 
