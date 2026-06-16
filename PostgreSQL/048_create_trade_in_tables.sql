@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS trade_in_item (
     parsed_by_ai        BOOLEAN NOT NULL DEFAULT false,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_trade_in_item_trade_in FOREIGN KEY (trade_in_id) REFERENCES trade_in(id) ON DELETE CASCADE,
-    CONSTRAINT fk_trade_in_item_inventory_item FOREIGN KEY (inventory_item_id) REFERENCES inventory_item(id),
+    CONSTRAINT fk_trade_in_item_game_inventory FOREIGN KEY (inventory_item_id) REFERENCES game_inventory(id),
     CONSTRAINT chk_trade_in_item_condition CHECK (condition IN ('poor', 'fair', 'good', 'excellent')),
     CONSTRAINT chk_trade_in_item_offered_value CHECK (offered_value >= 0),
     CONSTRAINT chk_trade_in_item_accepted_value CHECK (accepted_value IS NULL OR accepted_value >= 0)

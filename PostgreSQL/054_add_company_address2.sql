@@ -72,4 +72,4 @@ END;
 $$;
 
 COMMENT ON FUNCTION company_get_profile(INTEGER) IS 'Returns company profile for display and edit.';
-COMMENT ON FUNCTION company_update_profile(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) IS 'Updates company profile fields.';
+COMMENT ON FUNCTION company_update_profile(INTEGER, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) IS 'Updates company profile fields.';
