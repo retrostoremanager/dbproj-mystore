@@ -135,5 +135,8 @@
 --     working until then. Password is set out-of-band (secret), not in this migration.
 \i 062_create_app_user_role.sql
 
+-- 34. Add company_country column and update company profile functions (issue #380)
+\i 065_add_company_country.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
