@@ -124,6 +124,10 @@
 --      required indexes idempotently so the migration applies cleanly on clean and existing DBs.
 \i 064_align_promotion_schema_retry.sql
 
+-- 31c. Add company_country column to company table and update profile get/update functions
+--      (orchestrator-mystore#379: PUT /company/profile was silently dropping companyCountry).
+\i 065_add_company_country.sql
+
 -- 32. Enable Row-Level Security on tenant tables (database-level multi-tenant backstop).
 --     ORDER-CRITICAL: only deploy once the app sets app.current_company_id on its connections
 --     (fn-mystore TenantConnection). Runs LAST so every tenant table already exists. See the
