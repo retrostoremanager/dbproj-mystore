@@ -105,6 +105,12 @@
 --      (status default 'active', updated_at NOT NULL, NO ACTION FKs, renamed indexes)
 \i 063_align_consignment_constraints.sql
 
+-- 26c. Consignment schema retry (issue #373): assert the full ConsignmentItems
+--      and ConsignmentPayouts schema (columns, NOT NULLs, defaults, CHECKs,
+--      FKs with CASCADE on payouts, and required indexes) idempotently so the
+--      migration applies cleanly on both fresh and existing databases.
+\i 066_consignment_schema_retry.sql
+
 -- 27. Trade-in tables (TradeIns and TradeInItems)
 \i 048_create_trade_in_tables.sql
 
