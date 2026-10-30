@@ -13,6 +13,7 @@
 \i 015_create_payment_method_table.sql
 \i 016_add_company_stripe_customer_id.sql
 \i 020_create_subscription_table.sql
+\i 068_create_subscription_addon_table.sql
 
 -- 2. Migrate existing data/schema
 \i 011_migrate_company_to_timestamptz.sql
