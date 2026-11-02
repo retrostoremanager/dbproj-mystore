@@ -145,5 +145,8 @@
 -- 34. Add company_country column and update company profile functions (issue #380)
 \i 065_add_company_country.sql
 
+-- 35. Backfill Owner user/user_role rows missing since 031 for companies registered after it.
+\i 069_backfill_missing_owner_users.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
