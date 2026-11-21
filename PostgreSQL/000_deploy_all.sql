@@ -131,6 +131,23 @@
 --      required indexes idempotently so the migration applies cleanly on clean and existing DBs.
 \i 064_align_promotion_schema_retry.sql
 
+-- 31c. Migrations never added to this deploy-all script (discovered 2026-11-21 while
+--      adding tests/schema_tests.sql: the real deploy workflow auto-discovers every
+--      numbered file instead of using this script, so these silently drifted out of sync
+--      and a fresh bootstrap from this file alone was missing sale_item.subtotal, tax
+--      settings, the entire loyalty feature, company_address2, and payment_method.brand).
+--      Ordered to satisfy real dependencies: 053 needs 031's role/permission tables; 067
+--      supersedes 055/060/064 above and must run after them; both 052 and 067 must run
+--      before 061 below, which already assumes loyalty_transaction/loyalty_settings/
+--      promotion exist when it builds its tenant_tables RLS list.
+\i 047_add_sale_item_subtotal.sql
+\i 051_add_tax_settings.sql
+\i 052_create_loyalty_tables.sql
+\i 053_seed_loyalty_permissions.sql
+\i 054_add_company_address2.sql
+\i 059_add_brand_to_payment_method.sql
+\i 067_promotion_schema_retry.sql
+
 -- 32. Enable Row-Level Security on tenant tables (database-level multi-tenant backstop).
 --     ORDER-CRITICAL: only deploy once the app sets app.current_company_id on its connections
 --     (fn-mystore TenantConnection). Runs LAST so every tenant table already exists. See the
