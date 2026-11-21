@@ -1,0 +1,51 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - 'PostgreSQL/**'
+      - '.github/workflows/test.yml'
+  pull_request:
+    branches:
+      - development
+    paths:
+      - 'PostgreSQL/**'
+      - '.github/workflows/test.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mystore_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run migrations
+        working-directory: PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d mystore_db -v ON_ERROR_STOP=1 -f 000_deploy_all.sql
+
+      - name: Run schema tests
+        working-directory: PostgreSQL
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d mystore_db -v ON_ERROR_STOP=1 -f tests/schema_tests.sql
