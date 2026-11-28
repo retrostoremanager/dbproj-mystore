@@ -10,6 +10,14 @@
 ALTER TABLE sale ADD COLUMN IF NOT EXISTS discount_total DECIMAL(18, 2) NOT NULL DEFAULT 0;
 COMMENT ON COLUMN sale.discount_total IS 'Total discount applied across all promotions on this sale.';
 
+-- 044 only ever set a DEFAULT on total_amount when the column already existed (a legacy
+-- column from before migration 006 was edited in place to use subtotal/tax/total instead) --
+-- it never CREATED the column, so a fresh database (CI, local-dev, any future rebuild) never
+-- gets it at all. The app (SalesRepository.SaleSelectColumns) reads/writes total_amount
+-- exclusively and never reads the `total` column 042 added, so create total_amount
+-- unconditionally here; it's a no-op on databases (prod) that already have it.
+ALTER TABLE sale ADD COLUMN IF NOT EXISTS total_amount DECIMAL(18, 2) NOT NULL DEFAULT 0;
+
 ALTER TABLE sale_item ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(18, 2) NOT NULL DEFAULT 0;
 ALTER TABLE sale_item ADD COLUMN IF NOT EXISTS promotion_id INTEGER;
 ALTER TABLE sale_item ADD COLUMN IF NOT EXISTS promotion_name VARCHAR(200);
