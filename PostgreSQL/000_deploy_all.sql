@@ -173,5 +173,9 @@
 --     shipped the app side without this migration).
 \i 071_add_location_timezone.sql
 
+-- 38. Add sale.discount_total, sale_item promotion columns, and the sale_promotion table
+--     (SalesRepository has always referenced these; checkout has always 500'd).
+\i 072_add_sale_promotion_application_columns.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
