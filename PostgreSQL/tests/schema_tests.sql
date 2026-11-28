@@ -258,4 +258,90 @@ BEGIN
     DELETE FROM company WHERE id = v_company_id;
 END $$;
 
+-- ===== sale / sale_item / sale_promotion (072) =====
+-- Mirrors exactly the columns SalesRepository.CreateAsync writes (minus created_date,
+-- which was never read anywhere and was removed from the INSERT rather than migrated).
+
+DO $$
+DECLARE
+    v_company_id int;
+    v_location_id int;
+    v_customer_id int;
+    v_user_id int;
+    v_promotion_id int;
+    v_inventory_id int;
+    v_sale_id int;
+    v_sale_item_id int;
+BEGIN
+    v_company_id := pg_temp.create_test_company('sale-promo-test', 'sale-promo-test@example.com');
+
+    INSERT INTO location (company_id, name, is_primary, created_date)
+    VALUES (v_company_id, 'Test Location', true, NOW())
+    RETURNING id INTO v_location_id;
+
+    INSERT INTO customer (company_id, first_name, last_name, email, created_date)
+    VALUES (v_company_id, 'Cust', 'Omer', 'sale-promo-cust@example.com', NOW())
+    RETURNING id INTO v_customer_id;
+
+    INSERT INTO "user" (company_id, email, first_name, last_name)
+    VALUES (v_company_id, 'sale-promo-user@example.com', 'Test', 'User')
+    RETURNING id INTO v_user_id;
+
+    INSERT INTO promotion (company_id, name, type, discount_percent, scope, start_date, is_active, created_by)
+    VALUES (v_company_id, '10% Off', 'percentage', 10, 'store_wide', NOW() - INTERVAL '1 day', true, v_user_id)
+    RETURNING id INTO v_promotion_id;
+
+    INSERT INTO game_inventory (company_id, location_id, quantity, sell_price, buy_price, condition, added_date)
+    VALUES (v_company_id, v_location_id, 5, 19.99, 10.00, 'Good', NOW())
+    RETURNING id INTO v_inventory_id;
+
+    -- Exact column set SalesRepository.CreateAsync's insertSale writes (no created_date).
+    INSERT INTO sale (company_id, customer_id, user_id, subtotal, tax, total_amount,
+                       subtotal_amount, tax_amount, discount_total, payment_method, sale_date, notes)
+    VALUES (v_company_id, v_customer_id, v_user_id, 19.99, 1.65, 19.80,
+            19.99, 1.65, 2.00, 'Cash', NOW(), 'schema test sale')
+    RETURNING id INTO v_sale_id;
+
+    -- Exact column set insertItem writes (no subtotal/created_date -- neither read anywhere).
+    INSERT INTO sale_item (sale_id, inventory_item_id, quantity, unit_price, total_price,
+                            discount_amount, promotion_id, promotion_name)
+    VALUES (v_sale_id, v_inventory_id, 1, 19.99, 19.99, 2.00, v_promotion_id, '10% Off')
+    RETURNING id INTO v_sale_item_id;
+
+    INSERT INTO sale_promotion (sale_id, promotion_id, promotion_name, discount_amount)
+    VALUES (v_sale_id, v_promotion_id, '10% Off', 2.00);
+
+    PERFORM pg_temp.assert(
+        (SELECT discount_total FROM sale WHERE id = v_sale_id) = 2.00,
+        'sale.discount_total should round-trip');
+    PERFORM pg_temp.assert(
+        (SELECT discount_amount FROM sale_item WHERE id = v_sale_item_id) = 2.00,
+        'sale_item.discount_amount should round-trip');
+    PERFORM pg_temp.assert(
+        (SELECT COUNT(*) FROM sale_promotion WHERE sale_id = v_sale_id) = 1,
+        'sale_promotion row should be inserted');
+
+    -- Deleting the promotion should null out the FK, not delete sale history.
+    DELETE FROM promotion WHERE id = v_promotion_id;
+    PERFORM pg_temp.assert(
+        (SELECT promotion_id FROM sale_item WHERE id = v_sale_item_id) IS NULL,
+        'deleting a promotion should null sale_item.promotion_id, not delete the sale_item');
+    PERFORM pg_temp.assert(
+        (SELECT COUNT(*) FROM sale_promotion WHERE sale_id = v_sale_id) = 1,
+        'deleting a promotion should not delete the sale_promotion row');
+
+    -- Deleting the sale should cascade-delete its items and promotion breakdown.
+    DELETE FROM sale WHERE id = v_sale_id;
+    PERFORM pg_temp.assert(
+        NOT EXISTS (SELECT 1 FROM sale_item WHERE sale_id = v_sale_id),
+        'deleting a sale should cascade-delete its sale_item rows');
+    PERFORM pg_temp.assert(
+        NOT EXISTS (SELECT 1 FROM sale_promotion WHERE sale_id = v_sale_id),
+        'deleting a sale should cascade-delete its sale_promotion rows');
+
+    DELETE FROM game_inventory WHERE id = v_inventory_id;
+    DELETE FROM customer WHERE id = v_customer_id;
+    DELETE FROM company WHERE id = v_company_id;
+END $$;
+
 SELECT 'All mystore schema tests passed.' AS result;
