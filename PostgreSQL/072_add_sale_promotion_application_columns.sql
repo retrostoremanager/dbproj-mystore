@@ -18,6 +18,13 @@ COMMENT ON COLUMN sale.discount_total IS 'Total discount applied across all prom
 -- unconditionally here; it's a no-op on databases (prod) that already have it.
 ALTER TABLE sale ADD COLUMN IF NOT EXISTS total_amount DECIMAL(18, 2) NOT NULL DEFAULT 0;
 
+-- Same drift: 042's "ADD COLUMN IF NOT EXISTS total ... DEFAULT 0" is a no-op on a fresh
+-- database because the current 006 already creates `total` (with no default) before 042
+-- runs, so IF NOT EXISTS skips it and the default is never applied. The app never writes
+-- `total` (it writes total_amount only), so give it a default rather than require every
+-- INSERT to populate an unused legacy column.
+ALTER TABLE sale ALTER COLUMN total SET DEFAULT 0;
+
 ALTER TABLE sale_item ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(18, 2) NOT NULL DEFAULT 0;
 ALTER TABLE sale_item ADD COLUMN IF NOT EXISTS promotion_id INTEGER;
 ALTER TABLE sale_item ADD COLUMN IF NOT EXISTS promotion_name VARCHAR(200);
