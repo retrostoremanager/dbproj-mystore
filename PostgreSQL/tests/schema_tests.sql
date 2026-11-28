@@ -205,4 +205,57 @@ BEGIN
     DELETE FROM company WHERE id = v_company_id;
 END $$;
 
+-- ===== game_inventory (070) =====
+-- name/category must be nullable: the app (InventoryRepository, TradeInRepository) never
+-- populates them -- it derives Name/Category from a game_encyclopedia join instead.
+
+DO $$
+DECLARE
+    v_company_id int;
+    v_location_id int;
+BEGIN
+    v_company_id := pg_temp.create_test_company('game-inv-test', 'game-inv-test@example.com');
+
+    INSERT INTO location (company_id, name, is_primary, created_date)
+    VALUES (v_company_id, 'Test Location', true, NOW())
+    RETURNING id INTO v_location_id;
+
+    -- Should succeed with name/category omitted entirely.
+    INSERT INTO game_inventory (company_id, location_id, quantity, sell_price, buy_price, condition, added_date)
+    VALUES (v_company_id, v_location_id, 1, 9.99, 4.00, 'Good', NOW());
+
+    -- game_inventory has no ON DELETE CASCADE from company (unlike location), so clean it
+    -- up explicitly or the company delete below would fail on the FK.
+    DELETE FROM game_inventory WHERE company_id = v_company_id;
+    DELETE FROM company WHERE id = v_company_id;
+END $$;
+
+-- ===== location (071) =====
+-- timezone column + location_create/location_update must accept it (app has passed
+-- p_timezone since commit 184571f; the function signature must match).
+
+DO $$
+DECLARE
+    v_company_id int;
+    v_location_id int;
+    v_timezone text;
+BEGIN
+    v_company_id := pg_temp.create_test_company('loc-tz-test', 'loc-tz-test@example.com');
+
+    v_location_id := location_create(v_company_id, 'Main Store', NULL, NULL, NULL, NULL, NULL, 'America/New_York', true);
+
+    SELECT timezone INTO v_timezone FROM location WHERE id = v_location_id;
+    PERFORM pg_temp.assert(v_timezone = 'America/New_York', 'location_create should persist timezone');
+
+    PERFORM location_update(v_location_id, v_company_id, 'Main Store', NULL, NULL, NULL, NULL, NULL, 'America/Chicago', true);
+    SELECT timezone INTO v_timezone FROM location WHERE id = v_location_id;
+    PERFORM pg_temp.assert(v_timezone = 'America/Chicago', 'location_update should update timezone');
+
+    PERFORM pg_temp.assert(
+        (SELECT timezone FROM location_get_by_company_id(v_company_id) WHERE id = v_location_id) = 'America/Chicago',
+        'location_get_by_company_id should return timezone');
+
+    DELETE FROM company WHERE id = v_company_id;
+END $$;
+
 SELECT 'All mystore schema tests passed.' AS result;

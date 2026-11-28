@@ -165,5 +165,13 @@
 -- 35. Backfill Owner user/user_role rows missing since 031 for companies registered after it.
 \i 069_backfill_missing_owner_users.sql
 
+-- 36. Make game_inventory.name/category nullable (app never populates them post-034).
+\i 070_make_game_inventory_name_category_nullable.sql
+
+-- 37. Add location.timezone and republish location_create/location_update/
+--     location_get_by_company_id to accept/return it (finishes commit 184571f, which
+--     shipped the app side without this migration).
+\i 071_add_location_timezone.sql
+
 -- Deployment complete
 SELECT 'Database schema and functions created successfully!' AS status;
